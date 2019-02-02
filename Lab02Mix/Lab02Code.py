@@ -12,7 +12,7 @@
 #           be imported.
 
 ###########################
-# Group Members: TODO
+# Group Members: Weiqiu Liu
 ###########################
 
 
@@ -361,7 +361,6 @@ def generate_trace(number_of_users, threshold_size, number_of_rounds, targets_fr
     for _ in range(number_of_rounds // 2):
         senders = sorted(random.sample( others, threshold_size))
         receivers = sorted(random.sample( all_users, threshold_size))
-
         trace += [(senders, receivers)]
 
     ## Generate traces in which Alice (user 0) is sending
@@ -387,18 +386,41 @@ def analyze_trace(trace, target_number_of_friends, target=0):
     """
 
     ## ADD CODE HERE
+    c = Counter()
+    for element in trace:
+        if target in element[0]:
+            c.update(element[1])
 
-    return []
+    friends = [friend[0] for friend in c.most_common(target_number_of_friends)]
+
+    return friends
 
 ## TASK Q1 (Question 1): The mix packet format you worked on uses AES-CTR with an IV set to all zeros. 
 #                        Explain whether this is a security concern and justify your answer.
 
-""" TODO: Your answer HERE """
+"""
+Since a new symetric key would be generated for every time 
+the client sends a message, even if the attacker knows the 
+iv is all zeros, she still needs to know exactly the shared
+key, which is computationally infeasible. Therefore it is
+no need to use iv.
+"""
 
 
 ## TASK Q2 (Question 2): What assumptions does your implementation of the Statistical Disclosure Attack 
 #                        makes about the distribution of traffic from non-target senders to receivers? Is
 #                        the correctness of the result returned dependent on this background distribution?
 
-""" TODO: Your answer HERE """
+""" 
+The assumption is that all non-target senders have the 
+same possibility to send a traffic to any receiver, while 
+the target sender is more likely to send traffic to their 
+friends.
+
+That means the number of traffic from non-target senders
+to receivers would be a uniform distribution. Thus, the 
+traffic from target sender to receiver would be more 
+obivous to be discovered because these traffic happended 
+more times than that of non-target.
+"""
 
