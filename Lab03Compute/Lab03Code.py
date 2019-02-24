@@ -239,7 +239,18 @@ def simulate_poll(votes):
 # What is the advantage of the adversary in guessing b given your implementation of 
 # Homomorphic addition? What are the security implications of this?
 
-""" Your Answer here """
+""" Your Answer here
+
+if the attacker could access the decryption oracle, she would be able to calculate b.
+She just calculate C - Ca - Cb and pass the result to decryption oracle to get P.
+    if P == 0, then b = 0;
+    if P != 0, then b = 1.
+
+Security implications is that by definition homomorphically encryption cannot be CCA
+secure. That's because Dec(Enc(a+b)) = Dec(Enc(a)+Enc(b)) = Dec(Enc(a)) + Dec(Enc(b))
+= a + b.
+
+"""
 
 ###########################################################
 # TASK Q2 -- Answer questions regarding your implementation
@@ -250,4 +261,25 @@ def simulate_poll(votes):
 # that it yields an arbitrary result. Can those malicious actions 
 # be detected given your implementation?
 
-""" Your Answer here """
+""" Your Answer here 
+
+a)  no matter what vote is,
+    just set 
+        v0 = encrypt(params, pub, 0)
+        v1 = encrypt(params, pub, 0)
+    it yields (0, 0) result.
+b)  When encode_vote is first called,
+    set 
+        v0 = encrypt(params, pub, arbitrary_v0_value)
+        v1 = encrypt(params, pub, arbitrary_v1_value)
+    Then, when other votes come,
+    set
+        v0 = encrypt(params, pub, 0)
+        v1 = encrypt(params, pub, 0)
+    it finally yields (arbitrary_v0_value, arbitrary_v1_value) result.
+
+No, in process_votes() function, we add the ciphertext up. So we have no
+idea about single vote result. We only know the final result after we 
+decrypt the homomorphic addition of all vote.
+
+"""
