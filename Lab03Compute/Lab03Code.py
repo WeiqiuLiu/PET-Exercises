@@ -18,7 +18,7 @@
 
 
 from petlib.ec import EcGroup
-import pdb
+
 def setup():
     """Generates the Cryptosystem Parameters."""
     G = EcGroup(nid=713)
