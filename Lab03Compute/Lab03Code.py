@@ -13,12 +13,12 @@
 #
 
 ###########################
-# Group Members: TODO
+# Group Members: Weiqiu Liu
 ###########################
 
 
 from petlib.ec import EcGroup
-
+import pdb
 def setup():
     """Generates the Cryptosystem Parameters."""
     G = EcGroup(nid=713)
@@ -28,19 +28,24 @@ def setup():
     return (G, g, h, o)
 
 def keyGen(params):
-   """ Generate a private / public key pair """
-   (G, g, h, o) = params
-   
-   # ADD CODE HERE
+    """ Generate a private / public key pair """
+    (G, g, h, o) = params
 
-   return (priv, pub)
+    # ADD CODE HERE
+    priv = o.random()
+    pub = priv * g
+
+    return (priv, pub)
 
 def encrypt(params, pub, m):
     """ Encrypt a message under the public key """
     if not -100 < m < 100:
         raise Exception("Message value to low or high.")
 
-   # ADD CODE HERE
+    # ADD CODE HERE
+    (G, g, h, o) = params
+    k = o.random()
+    c = (k * g, k * pub + m * h)
 
     return c
 
@@ -73,9 +78,10 @@ def logh(params, hm):
 def decrypt(params, priv, ciphertext):
     """ Decrypt a message using the private key """
     assert isCiphertext(params, ciphertext)
-    a , b = ciphertext
+    a, b = ciphertext
 
-   # ADD CODE HERE
+    # ADD CODE HERE
+    hm = b - priv * a
 
     return logh(params, hm)
 
@@ -91,7 +97,8 @@ def add(params, pub, c1, c2):
     assert isCiphertext(params, c1)
     assert isCiphertext(params, c2)
 
-   # ADD CODE HERE
+    # ADD CODE HERE
+    c3 = c1[0] + c2[0], c1[1] + c2[1]
 
     return c3
 
@@ -100,7 +107,8 @@ def mul(params, pub, c1, alpha):
         product of the plaintext time alpha """
     assert isCiphertext(params, c1)
 
-   # ADD CODE HERE
+    # ADD CODE HERE
+    c3 = alpha * c1[0], alpha * c1[1]
 
     return c3
 
@@ -113,7 +121,10 @@ def groupKey(params, pubKeys=[]):
     """ Generate a group public key from a list of public keys """
     (G, g, h, o) = params
 
-   # ADD CODE HERE
+    # ADD CODE HERE
+    pub = 0 * g 
+    for pubKey in pubKeys:
+        pub += pubKey
 
     return pub
 
@@ -123,6 +134,8 @@ def partialDecrypt(params, priv, ciphertext, final=False):
     assert isCiphertext(params, ciphertext)
     
     # ADD CODE HERE
+    a1 = ciphertext[0]
+    b1 = ciphertext[1] - priv * a1
 
     if final:
         return logh(params, b1)
@@ -142,7 +155,10 @@ def corruptPubKey(params, priv, OtherPubKeys=[]):
         corrupt authority. """
     (G, g, h, o) = params
     
-   # ADD CODE HERE
+    # ADD CODE HERE
+    pub = priv * g
+    for pubKey in OtherPubKeys:
+        pub -= pubKey
 
     return pub
 
@@ -157,7 +173,9 @@ def encode_vote(params, pub, vote):
         zero and the votes for one."""
     assert vote in [0, 1]
 
-   # ADD CODE HERE
+    # ADD CODE HERE
+    v0 = encrypt(params, pub, not vote)
+    v1 = encrypt(params, pub, vote)
 
     return (v0, v1)
 
@@ -166,7 +184,11 @@ def process_votes(params, pub, encrypted_votes):
         to sum votes for zeros and votes for ones. """
     assert isinstance(encrypted_votes, list)
     
-   # ADD CODE HERE
+    # ADD CODE HERE
+    tv0, tv1 = encrypted_votes[0]
+    for v in encrypted_votes[1:]:
+        tv0 = add(params, pub, tv0, v[0])
+        tv1 = add(params, pub, tv1, v[1])
 
     return tv0, tv1
 
