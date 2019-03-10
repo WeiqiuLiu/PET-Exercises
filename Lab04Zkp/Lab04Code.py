@@ -7,7 +7,7 @@
 # $ py.test -v test_file_name.py
 
 ###########################
-# Group Members: TODO
+# Group Members: Weiqiu Liu
 ###########################
 
 from petlib.ec import EcGroup
@@ -52,7 +52,10 @@ def proveKey(params, priv, pub):
     (G, g, hs, o) = params
     
     ## YOUR CODE HERE:
-    
+    w = o.random()
+    gw_prime = w * g
+    c = to_challenge([g, gw_prime])
+    r = (w - c * priv) % o
     return (c, r)
 
 def verifyKey(params, pub, proof):
@@ -92,6 +95,22 @@ def proveCommitment(params, C, r, secrets):
     x0, x1, x2, x3 = secrets
 
     ## YOUR CODE HERE:
+    w0 = o.random();
+    w1 = o.random();
+    w2 = o.random();
+    w3 = o.random();
+    wr = o.random();
+
+    Cw_prime = w0 * h0 + w1 * h1 + w2 * h2 + w3 * h3 + wr * g;
+    c = to_challenge([g, h0, h1, h2, h3, Cw_prime]);
+
+    r0 = (w0 - c * x0) % o
+    r1 = (w1 - c * x1) % o
+    r2 = (w2 - c * x2) % o
+    r3 = (w3 - c * x3) % o
+    rr = (wr - c * r) % o
+
+    responses = (r0, r1, r2, r3, rr)
 
     return (c, responses)
 
@@ -139,8 +158,10 @@ def verifyDLEquality(params, K, L, proof):
     c, r = proof
 
     ## YOUR CODE HERE:
+    Kw = c * K + r * g
+    Lw = c * L + r * h0
 
-    return # YOUR RETURN HERE
+    return to_challenge([g, h0, Kw, Lw]) == c# YOUR RETURN HERE
 
 #####################################################
 # TASK 4 -- Prove correct encryption and knowledge of 
@@ -164,6 +185,13 @@ def proveEnc(params, pub, Ciphertext, k, m):
     a, b = Ciphertext
 
     ## YOUR CODE HERE:
+    wk = o.random()
+    wm = o.random()
+    Kw = wk * g
+    Mw = wk * pub + wm * h0
+    c = to_challenge([g, h0, Kw, Mw])
+    rk = (wk - c * k) % o
+    rm = (wm - c * m) % o
 
     return (c, (rk, rm))
 
@@ -174,8 +202,9 @@ def verifyEnc(params, pub, Ciphertext, proof):
     (c, (rk, rm)) = proof
 
     ## YOUR CODE HERE:
-
-    return ## YOUR RETURN HERE
+    Kw = c * a + rk * g
+    Mw = c * b + rk * pub + rm * h0
+    return to_challenge([g, h0, Kw, Mw]) == c## YOUR RETURN HERE
 
 
 #####################################################
@@ -199,16 +228,25 @@ def prove_x0eq10x1plus20(params, C, x0, x1, r):
     (G, g, (h0, h1, h2, h3), o) = params
 
     ## YOUR CODE HERE:
+    w1 = o.random()
+    wr = o.random()
 
-    return ## YOUR RETURN HERE
+    Cw = wr * g + w1 * h1 + (10 * w1 + 20) * h0
+    c = to_challenge([g, h0, h1, Cw])
+    r1 = (w1 - c * x1) % o
+    rr = (wr - c * r) % o
+
+    return (c, (r1, rr))
 
 def verify_x0eq10x1plus20(params, C, proof):
     """ Verify that proof of knowledge of C and x0 = 10 x1 + 20. """
     (G, g, (h0, h1, h2, h3), o) = params
 
     ## YOUR CODE HERE:
+    (c, (r1, rr)) = proof
+    Cw = c * C + r1 * h1 + rr * g + (10 * r1 + 20) * h0 - 20 * c * h0
 
-    return ## YOUR RETURN HERE
+    return to_challenge([g, h0, h1, Cw]) == c
 
 #####################################################
 # TASK 6 -- (OPTIONAL) Prove that a ciphertext is either 0 or 1
@@ -253,7 +291,19 @@ def test_bin_incorrect():
 # that  deviates from the Schnorr identification protocol? Justify 
 # your answer by describing what a dishonest verifier may do.
 
-""" TODO: Your answer here. """
+""" TODO: Your answer here. 
+
+No, it doesn't hold. That's because, if a dishonest verifier want to 
+learn something secret, he needs to choose c in some relationship with
+W. But plausible deniability means calculate W = (g^r)(pub^c) with randomly
+choosed r and c, which means the honest verifier determine r and c first,
+then W.
+
+If dishonest verifier choose c in some relationship with W, it's computational
+infeasible to calculate r by himself. So dishonest verifier have to get r
+through the prover. Thus, plausible deniability does not hold. 
+
+"""
 
 #####################################################
 # TASK Q2 - Answer the following question:
@@ -266,7 +316,14 @@ def test_bin_incorrect():
 #
 # Hint: Look at "test_prove_something" too.
 
-""" TODO: Your answer here. """
+""" TODO: Your answer here. 
+
+The verifier hopes to convince that the prover knows both x and y. But since 
+c1 + c2 = c, a prover could calculate the result by knowing only one secret
+(y in this example). So the verifier could only convince the prover knows one
+of the secrets.
+
+"""
 
 def prove_something(params, KX, KY, y):
     (G, g, _, o) = params
