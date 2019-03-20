@@ -280,6 +280,6 @@ b)  When encode_vote is first called,
 
 No, in process_votes() function, we add the ciphertext up. So we have no
 idea about single vote result. We only know the final result after we 
-decrypt the homomorphic addition of all vote.
+decrypt the homomorphic addition of all vote. 
 
 """
