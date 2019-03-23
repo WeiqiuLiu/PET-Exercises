@@ -393,4 +393,11 @@ def credential_show_verify_pseudonym(params, issuer_params, pseudonym, tag, proo
 
 """ Your answer here. 
 
+credential represents the id of e-cash user.
+
+statements need to be shown:
+1. user know the creadential id
+2. user has enough balance to pay
+3. the transaction is valid (this coin has not been spent before)
+
 """
